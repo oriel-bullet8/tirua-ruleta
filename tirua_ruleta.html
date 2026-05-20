@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruleta de Premios · TIRÚA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+      font-family: 'Nunito', sans-serif;
+    }
+    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 3.2rem; letter-spacing: 10px; color: #fff; line-height: 1; }
+    .logo-sub { font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; letter-spacing: 6px; color: #777; margin-bottom: 4px; }
+    .divider { width: 60px; height: 2px; background: #FF3D3D; margin: 10px auto 8px; }
+    .headline { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 3px; color: #fff; text-align: center; }
+    .sub { font-size: 13px; color: #777; margin: 6px 0 1.8rem; text-align: center; max-width: 300px; line-height: 1.5; }
+    .wheel-container { position: relative; width: 300px; height: 300px; margin-bottom: 1rem; }
+    .pointer {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 28px solid #FF3D3D;
+      z-index: 10;
+    }
+    canvas { border-radius: 50%; display: block; }
+    .spin-btn {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 3px;
+      padding: 14px 52px; background: #FF3D3D; color: #fff;
+      border: none; border-radius: 8px; cursor: pointer;
+      margin-top: 0.6rem; transition: background 0.15s, transform 0.1s;
+    }
+    .spin-btn:hover { background: #ff5a5a; }
+    .spin-btn:active { transform: scale(0.97); }
+    .spin-btn:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
+    .result-box {
+      margin-top: 1.2rem; padding: 1rem 1.5rem;
+      border: 3px solid #FF3D3D; border-radius: 12px;
+      text-align: center; min-height: 90px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 100%; max-width: 300px; background: #111;
+    }
+    .result-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-bottom: 4px; }
+    .result-prize { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; letter-spacing: 2px; color: #fff; }
+    .result-desc { font-size: 12px; color: #777; margin-top: 5px; }
+    .result-time { font-size: 11px; color: #444; margin-top: 4px; }
+    .info { font-size: 12px; color: #555; margin-top: 1rem; text-align: center; }
+    .already-played {
+      background: #111; border: 2px solid #333; border-radius: 12px;
+      padding: 2rem 1.5rem; text-align: center; max-width: 300px; margin-top: 1rem;
+    }
+    .already-played .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .already-played h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: #fff; margin-bottom: 6px; }
+    .already-played p { font-size: 13px; color: #666; line-height: 1.5; }
+    .footer { margin-top: 2.5rem; font-size: 11px; color: #383838; letter-spacing: 1px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="logo">TIRÚA</div>
+  <div class="logo-sub">BAR · RESTORÁN</div>
+  <div class="divider"></div>
+  <div class="headline">¡GIRA Y GANA UN PREMIO!</div>
+  <div class="sub">Solo una vez por visita · Válido presentando este resultado al mesero</div>
+
+  <div id="gameArea">
+    <div class="wheel-container">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="300" height="300"></canvas>
+    </div>
+    <div style="display:flex;justify-content:center">
+      <button class="spin-btn" id="spinBtn" onclick="spin()">GIRAR RULETA</button>
+    </div>
+    <div class="result-box" id="resultBox">
+      <div class="result-label">Tu premio</div>
+      <div class="result-prize" id="resultText">—</div>
+      <div class="result-desc" id="resultDesc">Gira la ruleta para descubrir</div>
+      <div class="result-time" id="resultTime"></div>
+    </div>
+    <div class="info" id="infoText">Tienes 1 oportunidad por día</div>
+  </div>
+
+  <div id="alreadyPlayed" class="already-played" style="display:none">
+    <div class="icon">🎰</div>
+    <h2>Ya jugaste hoy</h2>
+    <p>Solo hay una oportunidad por día.<br>¡Vuelve mañana para girar de nuevo!</p>
+  </div>
+
+  <div class="footer">Ramón Subercaseaux 455, Pirque &nbsp;·&nbsp; @bartirua</div>
+
+<script>
+  /* ── PREMIOS ── edita aquí para cambiar los premios ── */
+  const prizes = [
+    { label: 'SHOT DE\nTEQUILA',    desc: 'Muéstra este resultado al mesero', bg: '#FF3D3D', fg: '#fff' },
+    { label: 'BEBIDA\nLATA GRATIS', desc: 'Muéstra este resultado al mesero', bg: '#FFB800', fg: '#1a0f00' },
+    { label: 'MOJITO\nGRATIS',      desc: 'Muéstra este resultado al mesero', bg: '#00C97A', fg: '#fff' },
+    { label: 'BEBIDA\nLATA GRATIS', desc: 'Muéstra este resultado al mesero', bg: '#FF7043', fg: '#fff' },
+    { label: 'PAPAS\nTIRÚA',        desc: 'Muéstra este resultado al mesero', bg: '#9B59B6', fg: '#fff' },
+    { label: 'BEBIDA\nLATA GRATIS', desc: 'Muéstra este resultado al mesero', bg: '#1E90FF', fg: '#fff' },
+    { label: '10% DESC.\nEN CUENTA', desc: 'Muéstra este resultado al mesero', bg: '#FF3D3D', fg: '#fff' },
+    { label: 'BEBIDA\nLATA GRATIS', desc: 'Muéstra este resultado al mesero', bg: '#FFB800', fg: '#1a0f00' },
+  ];
+
+  const STORAGE_KEY = 'tirua_ruleta';
+  const NUM = prizes.length;
+  const ARC = (2 * Math.PI) / NUM;
+  let currentAngle = 0, spinning = false;
+
+  const canvas = document.getElementById('wheel');
+  const ctx = canvas.getContext('2d');
+  const cx = 150, cy = 150, r = 145;
+
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function checkPlayed() {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (data.date === todayStr()) {
+        document.getElementById('gameArea').style.display = 'none';
+        document.getElementById('alreadyPlayed').style.display = 'block';
+      }
+    } catch(e) {}
+  }
+
+  function markPlayed() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: todayStr() }));
+    } catch(e) {}
+  }
+
+  function drawWheel(a) {
+    ctx.clearRect(0, 0, 300, 300);
+    for (let i = 0; i < NUM; i++) {
+      const s = a + i * ARC, e = s + ARC;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, s, e); ctx.closePath();
+      ctx.fillStyle = prizes[i].bg; ctx.fill();
+      ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(s + ARC / 2); ctx.textAlign = 'right';
+      ctx.fillStyle = prizes[i].fg; ctx.font = 'bold 11px Nunito, sans-serif';
+      const ln = prizes[i].label.split('\n');
+      if (ln.length === 2) { ctx.fillText(ln[0], r - 10, -5); ctx.fillText(ln[1], r - 10, 9); }
+      else ctx.fillText(ln[0], r - 10, 4);
+      ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(cx, cy, 22, 0, 2 * Math.PI);
+    ctx.fillStyle = '#0a0a0a'; ctx.fill();
+    ctx.strokeStyle = '#FF3D3D'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#FF3D3D'; ctx.font = 'bold 14px Nunito, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('★', cx, cy + 5);
+  }
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function spin() {
+    if (spinning) return;
+    spinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('resultText').textContent = '—';
+    document.getElementById('resultDesc').textContent = 'Girando...';
+    document.getElementById('resultTime').textContent = '';
+    const targetRad = (5 + Math.floor(Math.random() * 4)) * 2 * Math.PI + Math.random() * 2 * Math.PI;
+    const startAngle = currentAngle, duration = 4200, start = performance.now();
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      currentAngle = startAngle + targetRad * easeOut(t);
+      drawWheel(currentAngle);
+      if (t < 1) { requestAnimationFrame(frame); }
+      else {
+        currentAngle = (startAngle + targetRad) % (2 * Math.PI);
+        drawWheel(currentAngle);
+        spinning = false;
+        showResult();
+        markPlayed();
+        document.getElementById('infoText').textContent = 'Has usado tu oportunidad de hoy — vuelve mañana';
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function showResult() {
+    let n = ((3 * Math.PI / 2 - currentAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    const idx = Math.floor(n / ARC) % NUM;
+    document.getElementById('resultText').textContent = prizes[idx].label.replace('\n', ' ');
+    document.getElementById('resultDesc').textContent = prizes[idx].desc;
+    document.getElementById('resultBox').style.borderColor = prizes[idx].bg;
+    const now = new Date();
+    document.getElementById('resultTime').textContent =
+      'Obtenido el ' + now.toLocaleDateString('es-CL') + ' a las ' + now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  checkPlayed();
+  drawWheel(0);
+</script>
+</body>
+</html>
