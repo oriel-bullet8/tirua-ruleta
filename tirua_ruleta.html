@@ -91,6 +91,11 @@
     <div class="icon">🎰</div>
     <h2>Ya jugaste hoy</h2>
     <p>Solo hay una oportunidad por día.<br>¡Vuelve mañana para girar de nuevo!</p>
+    <div id="savedPrizeBox" style="display:none; margin-top:1rem; padding:0.8rem 1rem; border:2px solid #FF3D3D; border-radius:8px; background:#1a1a1a;">
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#666; margin-bottom:4px;">Tu premio de hoy</div>
+      <div id="savedPrize" style="font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:2px; color:#fff;"></div>
+      <div style="font-size:12px; color:#777; margin-top:4px;">Muéstra esto al mesero para canjearlo</div>
+    </div>
   </div>
 
   <div class="footer">Ramón Subercaseaux 455, Pirque &nbsp;·&nbsp; @bartirua</div>
@@ -126,14 +131,19 @@
       const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       if (data.date === todayStr()) {
         document.getElementById('gameArea').style.display = 'none';
-        document.getElementById('alreadyPlayed').style.display = 'block';
+        const box = document.getElementById('alreadyPlayed');
+        box.style.display = 'block';
+        if (data.prize) {
+          document.getElementById('savedPrize').textContent = data.prize;
+          document.getElementById('savedPrizeBox').style.display = 'block';
+        }
       }
     } catch(e) {}
   }
 
-  function markPlayed() {
+  function markPlayed(prizeName) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: todayStr() }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: todayStr(), prize: prizeName }));
     } catch(e) {}
   }
 
@@ -179,7 +189,8 @@
         drawWheel(currentAngle);
         spinning = false;
         showResult();
-        markPlayed();
+        const prizeName = prizes[Math.floor(((( 3*Math.PI/2 - currentAngle) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI)) / ARC) % NUM].label.replace('\n',' ');
+        markPlayed(prizeName);
         document.getElementById('infoText').textContent = 'Has usado tu oportunidad de hoy — vuelve mañana';
       }
     }
