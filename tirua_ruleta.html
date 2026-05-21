@@ -6,118 +6,88 @@
   <title>Ruleta de Premios · TIRÚA</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #0a0a0a;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem 3rem;
-      font-family: 'Nunito', sans-serif;
-    }
-    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 3.2rem; letter-spacing: 10px; color: #fff; line-height: 1; }
-    .logo-sub { font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; letter-spacing: 6px; color: #777; margin-bottom: 4px; }
-    .divider { width: 60px; height: 2px; background: #FF3D3D; margin: 10px auto 8px; }
-    .headline { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 3px; color: #fff; text-align: center; }
-    .sub { font-size: 13px; color: #777; margin: 6px 0 1.8rem; text-align: center; max-width: 300px; line-height: 1.5; }
-    .wheel-container { position: relative; width: 300px; height: 300px; margin-bottom: 1rem; }
-    .pointer {
-      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
-      width: 0; height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-top: 28px solid #FF3D3D;
-      z-index: 10;
-    }
-    canvas { border-radius: 50%; display: block; }
-    .spin-btn {
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 3px;
-      padding: 14px 52px; background-color: #FF3D3D !important; color: #fff !important;
-      border: none !important; border-radius: 8px; cursor: pointer;
-      margin-top: 0.6rem; transition: background 0.15s, transform 0.1s;
-      display: inline-block; outline: none;
-    }
-    .spin-btn:hover { background-color: #ff5a5a !important; }
-    .spin-btn:active { transform: scale(0.97); }
-    .spin-btn:disabled { background-color: #2a2a2a !important; color: #555 !important; cursor: not-allowed; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0a0a;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 3rem;font-family:'Nunito',sans-serif;color:#fff}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:10px;color:#fff;line-height:1;text-align:center}
+    .logo-sub{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:6px;color:#666;text-align:center}
+    .divider{width:60px;height:2px;background:#FF3D3D;margin:10px auto}
+    .headline{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:#fff;text-align:center}
+    .sub{font-size:13px;color:#666;margin:6px 0 1.5rem;text-align:center;max-width:300px;line-height:1.6}
+
+    /* REGLAS */
+    .rules{width:100%;max-width:320px;background:#111;border:1px solid #222;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem}
+    .rules-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:#FF3D3D;margin-bottom:8px}
+    .rules ul{list-style:none;padding:0}
+    .rules ul li{font-size:12px;color:#888;padding:4px 0;border-bottom:1px solid #1a1a1a;line-height:1.5}
+    .rules ul li:last-child{border-bottom:none}
+    .rules ul li::before{content:"→ ";color:#FF3D3D}
+
+    /* RULETA */
+    .wheel-container{position:relative;width:300px;height:300px;margin-bottom:1rem}
+    .pointer{position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid #FF3D3D;z-index:10}
+    canvas{border-radius:50%;display:block}
+    .spin-btn{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;padding:14px 52px;background:#FF3D3D;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:0.6rem;transition:background 0.15s}
+    .spin-btn:hover{background:#ff5a5a}
+    .spin-btn:disabled{background:#2a2a2a;color:#555;cursor:not-allowed}
 
     /* CUPÓN */
-    .coupon {
-      display: none;
-      margin-top: 1.2rem;
-      width: 100%; max-width: 320px;
-      background: #111;
-      border: 2px dashed #FF3D3D;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .coupon-header {
-      background: #FF3D3D;
-      padding: 10px 16px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .coupon-header-title { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 3px; color: #fff; }
-    .coupon-header-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 4px; color: #fff; }
-    .coupon-body { padding: 1rem 1.2rem; }
-    .coupon-prize-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-bottom: 4px; }
-    .coupon-prize { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; color: #fff; line-height: 1.1; }
-    .coupon-divider { height: 1px; background: #222; margin: 10px 0; }
-    .coupon-conditions {
-      font-size: 11px; color: #FF3D3D; line-height: 1.5;
-      border: 1px solid #2a0000; background: #1a0000;
-      border-radius: 6px; padding: 8px 10px; margin-bottom: 10px;
-    }
-    .coupon-code-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-bottom: 4px; }
-    .coupon-code { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 6px; color: #FFB800; }
-    .coupon-date { font-size: 11px; color: #444; margin-top: 6px; }
-    .screenshot-hint {
-      background: #1a1a1a; border-top: 1px solid #222;
-      padding: 10px 14px; font-size: 12px; color: #666; text-align: center; line-height: 1.4;
-    }
-    .reserve-btns { display: flex; gap: 10px; margin-top: 1rem; width: 100%; max-width: 320px; }
-    .btn-wsp {
-      flex: 1; padding: 12px 8px;
-      background-color: #25D366 !important; color: #fff !important;
-      border: none !important; border-radius: 8px; cursor: pointer;
-      font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px;
-      outline: none; text-decoration: none; text-align: center; display: block;
-    }
-    .btn-ig {
-      flex: 1; padding: 12px 8px;
-      background-color: #C13584 !important; color: #fff !important;
-      border: none !important; border-radius: 8px; cursor: pointer;
-      font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px;
-      outline: none; text-decoration: none; text-align: center; display: block;
-    }
+    .coupon{display:none;width:100%;max-width:320px;background:#111;border:2px dashed #FF3D3D;border-radius:12px;overflow:hidden;margin-top:1.2rem}
+    .coupon-header{background:#FF3D3D;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .coupon-header span{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:#fff}
+    .coupon-body{padding:1rem 1.2rem}
+    .c-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#555;margin-bottom:4px}
+    .c-prize{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;color:#fff;line-height:1.1;margin-bottom:10px}
+    .c-warning{font-size:11px;color:#FF3D3D;background:#1a0000;border:1px solid #3a0000;border-radius:6px;padding:8px 10px;margin-bottom:10px;line-height:1.6}
+    .c-code{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:6px;color:#FFB800}
+    .c-date{font-size:11px;color:#444;margin-top:4px}
+    .coupon-footer{background:#1a1a1a;border-top:1px solid #222;padding:10px 14px;font-size:12px;color:#555;text-align:center}
+
+    /* BOTONES RESERVA — siempre visibles tras girar */
+    .reserve-section{display:none;width:100%;max-width:320px;margin-top:1rem}
+    .reserve-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:#fff;text-align:center;margin-bottom:10px}
+    .reserve-btns{display:flex;gap:10px}
+    .btn-wsp,.btn-ig{flex:1;padding:13px 8px;border:none;border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:2px;color:#fff;text-align:center;text-decoration:none;display:block}
+    .btn-wsp{background:#25D366}
+    .btn-wsp:hover{background:#1ebe5d}
+    .btn-ig{background:#C13584}
+    .btn-ig:hover{background:#a12d70}
 
     /* YA JUGASTE */
-    .already-played {
-      background: #111; border: 2px solid #222; border-radius: 12px;
-      padding: 2rem 1.5rem; text-align: center; max-width: 320px; margin-top: 1rem; width: 100%;
-    }
-    .already-played .icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .already-played h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: #fff; margin-bottom: 6px; }
-    .already-played p { font-size: 13px; color: #666; line-height: 1.5; }
-    .saved-prize-box {
-      display: none; margin-top: 1rem; padding: 0.8rem 1rem;
-      border: 2px dashed #FF3D3D; border-radius: 8px; background: #1a1a1a;
-    }
-    .saved-prize-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-bottom: 4px; }
-    .saved-prize-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 2px; color: #fff; }
-    .saved-prize-code { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 4px; color: #FFB800; margin-top: 4px; }
-    .saved-prize-hint { font-size: 11px; color: #555; margin-top: 6px; }
-    .footer { margin-top: 2.5rem; font-size: 11px; color: #383838; letter-spacing: 1px; text-align: center; }
+    .already{display:none;width:100%;max-width:320px;background:#111;border:2px solid #1a1a1a;border-radius:12px;padding:2rem 1.5rem;text-align:center;margin-top:1rem}
+    .already .icon{font-size:2.5rem;margin-bottom:0.5rem}
+    .already h2{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;color:#fff;margin-bottom:6px}
+    .already p{font-size:13px;color:#555;line-height:1.6;margin-bottom:1rem}
+    .saved-box{border:2px dashed #FF3D3D;border-radius:8px;background:#1a1a1a;padding:1rem}
+    .saved-prize{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#fff;margin:4px 0}
+    .saved-code{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:5px;color:#FFB800;margin:4px 0}
+    .saved-hint{font-size:11px;color:#555;margin-top:6px}
+    .saved-reserve{display:flex;gap:10px;margin-top:1rem}
+
+    .footer{margin-top:2.5rem;font-size:11px;color:#333;letter-spacing:1px;text-align:center}
   </style>
 </head>
 <body>
 
   <div class="logo">TIRÚA</div>
-  <div class="logo-sub">BAR · RESTORÁN</div>
+  <div class="logo-sub">BAR · RESTORÁN · PIRQUE</div>
   <div class="divider"></div>
   <div class="headline">¡GIRA Y GANA UN PREMIO!</div>
-  <div class="sub">Reserva tu mesa y presenta tu cupón al llegar</div>
+  <div class="sub">Un giro por reserva · Presenta tu cupón al llegar</div>
 
+  <!-- REGLAS -->
+  <div class="rules">
+    <div class="rules-title">¿Cómo funciona?</div>
+    <ul>
+      <li>Gira la ruleta y descubre tu premio</li>
+      <li>El premio es válido solo con reserva previa</li>
+      <li>Reserva por WhatsApp o Instagram indicando tu código</li>
+      <li>Muestra el cupón al mesero al llegar</li>
+      <li>Un cupón por reserva — no acumulable</li>
+      <li>El local verifica el código al confirmar tu reserva</li>
+    </ul>
+  </div>
+
+  <!-- RULETA -->
   <div id="gameArea" style="display:flex;flex-direction:column;align-items:center;width:100%">
     <div class="wheel-container">
       <div class="pointer"></div>
@@ -125,167 +95,166 @@
     </div>
     <button class="spin-btn" id="spinBtn" onclick="spin()">GIRAR RULETA</button>
 
-    <!-- CUPÓN (aparece tras girar) -->
+    <!-- CUPÓN -->
     <div class="coupon" id="coupon">
       <div class="coupon-header">
-        <div class="coupon-header-title">CUPÓN DE PREMIO</div>
-        <div class="coupon-header-logo">TIRÚA</div>
+        <span>CUPÓN DE PREMIO</span>
+        <span>TIRÚA</span>
       </div>
       <div class="coupon-body">
-        <div class="coupon-prize-label">Tu premio</div>
-        <div class="coupon-prize" id="couponPrize">—</div>
-        <div class="coupon-divider"></div>
-        <div class="coupon-conditions">
-          ⚠ Válido solo con reserva previa por WhatsApp o Instagram.<br>
-          Un cupón por reserva · Presenta este cupón al mesero al llegar.
-        </div>
-        <div class="coupon-code-label">Código único</div>
-        <div class="coupon-code" id="couponCode">—</div>
-        <div class="coupon-date" id="couponDate">—</div>
+        <div class="c-label">Tu premio</div>
+        <div class="c-prize" id="couponPrize">—</div>
+        <div class="c-warning">⚠ Solo válido con reserva previa.<br>Indica tu código al reservar por WhatsApp o Instagram.<br>El local verificará el código antes de canjearlo.</div>
+        <div class="c-label">Código único</div>
+        <div class="c-code" id="couponCode">—</div>
+        <div class="c-date" id="couponDate">—</div>
       </div>
-      <div class="screenshot-hint">📸 Saca captura de pantalla para guardar tu cupón</div>
+      <div class="coupon-footer">📸 Saca captura de pantalla para guardar tu cupón</div>
     </div>
 
     <!-- BOTONES RESERVA -->
-    <div class="reserve-btns" id="reserveBtns" style="display:none">
-      <a class="btn-wsp" href="https://wa.me/56994922069?text=Hola!%20Quiero%20reservar%20una%20mesa%20en%20Tirúa.%20Mi%20código%20de%20cupón%20es%3A%20" id="btnWsp" target="_blank">📱 RESERVAR POR WSP</a>
-      <a class="btn-ig" href="https://instagram.com/bartirua" target="_blank">📷 RESERVAR POR IG</a>
+    <div class="reserve-section" id="reserveSection">
+      <div class="reserve-title">RESERVA AHORA</div>
+      <div class="reserve-btns">
+        <a class="btn-wsp" id="btnWsp" href="#" target="_blank">📱 WHATSAPP</a>
+        <a class="btn-ig" href="https://instagram.com/bartirua" target="_blank">📷 INSTAGRAM</a>
+      </div>
     </div>
   </div>
 
   <!-- YA JUGASTE -->
-  <div id="alreadyPlayed" class="already-played" style="display:none">
+  <div class="already" id="alreadyPlayed">
     <div class="icon">🎰</div>
     <h2>Ya jugaste hoy</h2>
-    <p>Solo un cupón por reserva.<br>¡Vuelve mañana para girar de nuevo!</p>
-    <div class="saved-prize-box" id="savedPrizeBox">
-      <div class="saved-prize-label">Tu cupón de hoy</div>
-      <div class="saved-prize-name" id="savedPrizeName">—</div>
-      <div class="saved-prize-code" id="savedPrizeCode">—</div>
-      <div class="saved-prize-hint">📸 Si no tienes la captura, muestra esta pantalla al mesero</div>
+    <p>Solo un cupón por reserva.<br>Vuelve mañana para girar de nuevo.</p>
+    <div class="saved-box">
+      <div class="c-label">Tu cupón de hoy</div>
+      <div class="saved-prize" id="savedPrize">—</div>
+      <div class="saved-code" id="savedCode">—</div>
+      <div class="saved-hint">📸 Si no tienes la captura, muestra esta pantalla al mesero</div>
+    </div>
+    <div class="saved-reserve">
+      <a class="btn-wsp" id="savedBtnWsp" href="#" target="_blank">📱 WHATSAPP</a>
+      <a class="btn-ig" href="https://instagram.com/bartirua" target="_blank">📷 INSTAGRAM</a>
     </div>
   </div>
 
-  <div class="footer">Ramón Subercaseaux 455, Pirque · @bartirua</div>
+  <div class="footer">Ramón Subercaseaux 455, Pirque &nbsp;·&nbsp; @bartirua</div>
 
 <script>
-  const prizes = [
-    { label: 'SHOT DE\nTEQUILA',    bg: '#FF3D3D', fg: '#fff' },
-    { label: 'BEBIDA\nLATA GRATIS', bg: '#FFB800', fg: '#1a0f00' },
-    { label: 'MOJITO\nGRATIS',      bg: '#00C97A', fg: '#fff' },
-    { label: 'BEBIDA\nLATA GRATIS', bg: '#FF7043', fg: '#fff' },
-    { label: 'PAPAS\nTIRÚA',        bg: '#9B59B6', fg: '#fff' },
-    { label: 'BEBIDA\nLATA GRATIS', bg: '#1E90FF', fg: '#fff' },
-    { label: '10% DESC.\nEN CUENTA', bg: '#FF3D3D', fg: '#fff' },
-    { label: 'BEBIDA\nLATA GRATIS', bg: '#FFB800', fg: '#1a0f00' },
+  const prizes=[
+    {label:'SHOT DE\nTEQUILA',    bg:'#FF3D3D',fg:'#fff'},
+    {label:'BEBIDA\nLATA GRATIS', bg:'#FFB800',fg:'#1a0f00'},
+    {label:'MOJITO\nGRATIS',      bg:'#00C97A',fg:'#fff'},
+    {label:'BEBIDA\nLATA GRATIS', bg:'#FF7043',fg:'#fff'},
+    {label:'PAPAS\nTIRÚA',        bg:'#9B59B6',fg:'#fff'},
+    {label:'BEBIDA\nLATA GRATIS', bg:'#1E90FF',fg:'#fff'},
+    {label:'10% DESC.\nEN CUENTA',bg:'#FF3D3D',fg:'#fff'},
+    {label:'BEBIDA\nLATA GRATIS', bg:'#FFB800',fg:'#1a0f00'},
   ];
+  const WSP_NUMBER='56982309777';
+  const KEY='tirua_ruleta';
+  const NUM=prizes.length, ARC=(2*Math.PI)/NUM;
+  let angle=0, spinning=false;
+  const canvas=document.getElementById('wheel');
+  const ctx=canvas.getContext('2d');
 
-  const STORAGE_KEY = 'tirua_ruleta';
-  const NUM = prizes.length;
-  const ARC = (2 * Math.PI) / NUM;
-  let currentAngle = 0, spinning = false;
+  function today(){return new Date().toISOString().slice(0,10)}
 
-  const canvas = document.getElementById('wheel');
-  const ctx = canvas.getContext('2d');
-  const cx = 150, cy = 150, r = 145;
-
-  function todayStr() { return new Date().toISOString().slice(0, 10); }
-
-  function genCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = 'TIRUA-';
-    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    return code;
+  function genCode(){
+    const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s='TIRUA-';
+    for(let i=0;i<6;i++) s+=c[Math.floor(Math.random()*c.length)];
+    return s;
   }
 
-  function checkPlayed() {
-    try {
-      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      if (data.date === todayStr()) {
-        document.getElementById('gameArea').style.display = 'none';
-        document.getElementById('alreadyPlayed').style.display = 'block';
-        if (data.prize) {
-          document.getElementById('savedPrizeName').textContent = data.prize;
-          document.getElementById('savedPrizeCode').textContent = data.code || '';
-          document.getElementById('savedPrizeBox').style.display = 'block';
+  function wspLink(code,prize){
+    const msg=encodeURIComponent('Hola! Quiero reservar en Tirúa. Tengo un cupón de premio: '+prize+'. Mi código es: '+code);
+    return 'https://wa.me/'+WSP_NUMBER+'?text='+msg;
+  }
+
+  function checkPlayed(){
+    try{
+      const d=JSON.parse(localStorage.getItem(KEY)||'{}');
+      if(d.date===today()){
+        document.getElementById('gameArea').style.display='none';
+        const el=document.getElementById('alreadyPlayed');
+        el.style.display='block';
+        if(d.prize){
+          document.getElementById('savedPrize').textContent=d.prize;
+          document.getElementById('savedCode').textContent=d.code;
+          document.getElementById('savedBtnWsp').href=wspLink(d.code,d.prize);
         }
       }
-    } catch(e) {}
+    }catch(e){}
   }
 
-  function markPlayed(prize, code) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: todayStr(), prize, code }));
-    } catch(e) {}
+  function save(prize,code){
+    try{localStorage.setItem(KEY,JSON.stringify({date:today(),prize,code}))}catch(e){}
   }
 
-  function drawWheel(a) {
-    ctx.clearRect(0, 0, 300, 300);
-    for (let i = 0; i < NUM; i++) {
-      const s = a + i * ARC, e = s + ARC;
-      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, s, e); ctx.closePath();
-      ctx.fillStyle = prizes[i].bg; ctx.fill();
-      ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 2.5; ctx.stroke();
-      ctx.save(); ctx.translate(cx, cy); ctx.rotate(s + ARC / 2); ctx.textAlign = 'right';
-      ctx.fillStyle = prizes[i].fg; ctx.font = 'bold 11px Nunito, sans-serif';
-      const ln = prizes[i].label.split('\n');
-      if (ln.length === 2) { ctx.fillText(ln[0], r - 10, -5); ctx.fillText(ln[1], r - 10, 9); }
-      else ctx.fillText(ln[0], r - 10, 4);
+  function draw(a){
+    ctx.clearRect(0,0,300,300);
+    for(let i=0;i<NUM;i++){
+      const s=a+i*ARC,e=s+ARC;
+      ctx.beginPath();ctx.moveTo(150,150);ctx.arc(150,150,145,s,e);ctx.closePath();
+      ctx.fillStyle=prizes[i].bg;ctx.fill();
+      ctx.strokeStyle='#0a0a0a';ctx.lineWidth=2.5;ctx.stroke();
+      ctx.save();ctx.translate(150,150);ctx.rotate(s+ARC/2);ctx.textAlign='right';
+      ctx.fillStyle=prizes[i].fg;ctx.font='bold 11px Nunito,sans-serif';
+      const ln=prizes[i].label.split('\n');
+      if(ln.length===2){ctx.fillText(ln[0],135,-5);ctx.fillText(ln[1],135,9);}
+      else ctx.fillText(ln[0],135,4);
       ctx.restore();
     }
-    ctx.beginPath(); ctx.arc(cx, cy, 22, 0, 2 * Math.PI);
-    ctx.fillStyle = '#0a0a0a'; ctx.fill();
-    ctx.strokeStyle = '#FF3D3D'; ctx.lineWidth = 3; ctx.stroke();
-    ctx.fillStyle = '#FF3D3D'; ctx.font = 'bold 14px Nunito, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('★', cx, cy + 5);
+    ctx.beginPath();ctx.arc(150,150,22,0,2*Math.PI);
+    ctx.fillStyle='#0a0a0a';ctx.fill();
+    ctx.strokeStyle='#FF3D3D';ctx.lineWidth=3;ctx.stroke();
+    ctx.fillStyle='#FF3D3D';ctx.font='bold 14px Nunito,sans-serif';ctx.textAlign='center';
+    ctx.fillText('★',150,155);
   }
 
-  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+  function easeOut(t){return 1-Math.pow(1-t,4)}
 
-  function spin() {
-    if (spinning) return;
-    spinning = true;
-    document.getElementById('spinBtn').disabled = true;
-    const targetRad = (5 + Math.floor(Math.random() * 4)) * 2 * Math.PI + Math.random() * 2 * Math.PI;
-    const startAngle = currentAngle, duration = 4200, start = performance.now();
-    function frame(now) {
-      const t = Math.min((now - start) / duration, 1);
-      currentAngle = startAngle + targetRad * easeOut(t);
-      drawWheel(currentAngle);
-      if (t < 1) requestAnimationFrame(frame);
-      else {
-        currentAngle = (startAngle + targetRad) % (2 * Math.PI);
-        drawWheel(currentAngle);
-        spinning = false;
+  function spin(){
+    if(spinning)return;
+    spinning=true;
+    document.getElementById('spinBtn').disabled=true;
+    const target=(5+Math.floor(Math.random()*4))*2*Math.PI+Math.random()*2*Math.PI;
+    const start0=angle, dur=4200, t0=performance.now();
+    function frame(now){
+      const t=Math.min((now-t0)/dur,1);
+      angle=start0+target*easeOut(t);
+      draw(angle);
+      if(t<1)requestAnimationFrame(frame);
+      else{
+        angle=(start0+target)%(2*Math.PI);
+        draw(angle);
+        spinning=false;
         showResult();
       }
     }
     requestAnimationFrame(frame);
   }
 
-  function showResult() {
-    let n = ((3 * Math.PI / 2 - currentAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-    const idx = Math.floor(n / ARC) % NUM;
-    const prize = prizes[idx].label.replace('\n', ' ');
-    const code = genCode();
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('es-CL') + ' · ' + now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-
-    document.getElementById('couponPrize').textContent = prize;
-    document.getElementById('couponCode').textContent = code;
-    document.getElementById('couponDate').textContent = 'Obtenido el ' + dateStr;
-    document.getElementById('coupon').style.display = 'block';
-    document.getElementById('reserveBtns').style.display = 'flex';
-
-    // Update WSP link with code
-    document.getElementById('btnWsp').href =
-      'https://wa.me/56994922069?text=Hola!%20Quiero%20reservar%20en%20Tir%C3%BAa.%20Mi%20c%C3%B3digo%20de%20cup%C3%B3n%20es%3A%20' + code;
-
-    markPlayed(prize, code);
+  function showResult(){
+    let n=((3*Math.PI/2-angle)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+    const idx=Math.floor(n/ARC)%NUM;
+    const prize=prizes[idx].label.replace('\n',' ');
+    const code=genCode();
+    const now=new Date();
+    const dateStr=now.toLocaleDateString('es-CL')+' · '+now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('couponPrize').textContent=prize;
+    document.getElementById('couponCode').textContent=code;
+    document.getElementById('couponDate').textContent='Obtenido el '+dateStr;
+    document.getElementById('coupon').style.display='block';
+    document.getElementById('btnWsp').href=wspLink(code,prize);
+    document.getElementById('reserveSection').style.display='block';
+    save(prize,code);
   }
 
   checkPlayed();
-  drawWheel(0);
+  draw(0);
 </script>
 </body>
 </html>
